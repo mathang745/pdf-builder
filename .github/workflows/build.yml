@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Fast Build Android APK
 
 on:
   push:
@@ -24,7 +24,17 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Install system dependencies
+    - name: Restore Buildozer & SDK Cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.buildozer
+          .buildozer
+        key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+        restore-keys: |
+          buildozer-${{ runner.os }}-
+
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev
