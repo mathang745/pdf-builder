@@ -34,8 +34,14 @@ jobs:
     - name: Build APK with Buildozer
       run: |
         buildozer init
+        # Set requirements
         sed -i 's/^requirements = .*/requirements = python3,kivy,pymupdf/' buildozer.spec
+        # Accept SDK License
         sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
+        # Target modern 64-bit Android architecture (Prevents missing 32-bit wheel error)
+        sed -i 's/#android.archs = arm64-v8a, armeabi-v7a/android.archs = arm64-v8a/' buildozer.spec
+        # Use python-for-android develop branch to fix pip dry-run issue
+        sed -i 's/#p4a.branch = master/p4a.branch = develop/' buildozer.spec
         yes | buildozer -v android debug
 
     - name: Upload APK
