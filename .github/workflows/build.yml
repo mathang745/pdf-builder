@@ -24,24 +24,21 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Install system dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev
         pip install --upgrade pip
         pip install cython buildozer
 
-    - name: Build APK with Buildozer
+    - name: Configure and Build APK
       run: |
         buildozer init
-        # Set requirements
-        sed -i 's/^requirements = .*/requirements = python3,kivy,pymupdf/' buildozer.spec
-        # Accept SDK License
+        # Set requirements with standard pypdf for clean Android compilation
+        sed -i 's/^requirements = .*/requirements = python3,kivy,pypdf/' buildozer.spec
         sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
-        # Target modern 64-bit Android architecture (Prevents missing 32-bit wheel error)
-        sed -i 's/#android.archs = arm64-v8a, armeabi-v7a/android.archs = arm64-v8a/' buildozer.spec
-        # Use python-for-android develop branch to fix pip dry-run issue
-        sed -i 's/#p4a.branch = master/p4a.branch = develop/' buildozer.spec
+        # Enforce modern 64-bit architecture only
+        sed -i '/^#\?android.archs/c\android.archs = arm64-v8a' buildozer.spec
         yes | buildozer -v android debug
 
     - name: Upload APK
